@@ -155,7 +155,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                var model = new Grouproom { GroupName = groupName, Created=DateTime.Now, OwnerId= };
+                var model = new Grouproom { GroupName = groupName, Created=DateTime.Now, OwnerId= owner};
                 using (var db = new OcphDbContext())
                 {
                     model.GroupId = db.Groups.InsertAndGetLastID(model);

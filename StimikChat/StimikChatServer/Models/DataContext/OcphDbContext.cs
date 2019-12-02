@@ -12,12 +12,13 @@ namespace StimikChatServer.Models.DataContext
     {
         public OcphDbContext()
         {
-            ConnectionString = "Server=localhost;database=stimikchatdb;uid=root;password=;port=3306";
+          //  ConnectionString = "Server=localhost;database=stimikchatdb;uid=root;password=;port=3306";
+            ConnectionString = "Server=remotemysql.com;database=JkCjm21I8b;uid=JkCjm21I8b;password=SMTi87KMkH;port=3306";
         }
 
 
         public IRepository<User> Users{ get { return new Repository<User>(this); } }
-        public IRepository<Contact> Contacs { get { return new Repository<Contact>(this); } }
+        public IRepository<ContactDto> Contacs { get { return new Repository<ContactDto>(this); } }
         public IRepository<Contactitem> ContacItems { get { return new Repository<Contactitem>(this); } }
         public IRepository<Conversation> Conversations{ get { return new Repository<Conversation>(this); } }
         public IRepository<Grouproom> Groups { get { return new Repository<Grouproom>(this); } }

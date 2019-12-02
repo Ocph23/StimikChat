@@ -1,12 +1,9 @@
-﻿using Ocph.DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ModelShared.Interfaces;
+using Ocph.DAL;
 
 namespace StimikChatServer.Models.DataContext.ModelsData
 {
-    [TableName("connection")]
+    [TableName("Connection")]
     public class Connection:IConnection
     {
         [PrimaryKey("UserId")]

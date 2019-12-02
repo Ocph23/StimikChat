@@ -1,4 +1,4 @@
-﻿namespace StimikChatServer.Models
+﻿namespace ModelShared.Interfaces
 {
     public interface IConnection
     {

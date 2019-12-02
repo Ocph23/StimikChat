@@ -1,136 +1,102 @@
-﻿@page "/chat"
+﻿@page "/chat/{Id:int}"
 
 @using StimikChat.Data
 @using StimikChat.Models;
 @using Microsoft.AspNetCore.SignalR.Client;
 @using System.Collections;
 
+@inject AccountService accountService;
 @inject ChatService chatService;
-<h1>Chat Room</h1>
+
+<h1>Chat With @chatService.CurrentRoom.FirstName</h1>
 <div class="mainRoom">
     <EditForm Model="@model">
-        <div class="connectionRoom">
-            <InputText @bind-Value="@model.UserName" />
-            <button @onclick="Connect">Connect</button>
-        </div>
 
         <div class="chatBody">
-            <InputSelect @bind-Value="model.Destination">
-                @foreach (var item in users)
-                {
-                    <option value="@item">@item</option>
-                }
-            </InputSelect>
-
             <ul>
-                @foreach (var item in MessageList)
+                @foreach (var item in chatService.CurrentRoom.Conversations)
                 {
-                    <li>@item</li>
+                <li>
+                    @if (item.SenderId == chatService.CurrentRoom.UserId)
+                    {
+                        <div class="recieve">
+                            <h5 class="userName">@chatService.CurrentRoom.FirstName</h5>
+                            <h5>@item.Message</h5>
+                            <h6>@item.Created <span>Dibaca: @item.Readed</span></h6>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sender">
+                            <h5 class="userName">@chatService.CurrentRoom.myAccount.NamaUser</h5>
+                            <h5>@item.Message</h5>
+                            <h6>@item.Created <span>Dibaca: @item.Readed</span></h6>
+                        </div>
+                    }
+
+
+                </li>
                 }
             </ul>
             <InputTextArea @bind-Value="model.Message"></InputTextArea>
-            <button type="button" @onclick="Send" >Send</button>
-
+            <button type="button" @onclick="Send">Send</button>
         </div>
     </EditForm>
 </div>
 
-
-<div class="mainRoom">
-    <EditForm Model="@model">
-        <div class="connectionRoom">
-            <InputText @bind-Value="@model.UserName" />
-        </div>
-
-        <div class="chatBody">
-            <InputSelect @bind-Value="model.Group">
-                @foreach (var item in groups)
-                {
-                    <option value="@item">@item</option>
-                }
-            </InputSelect>
-
-            <ul>
-                @foreach (var item in GroupMessageList)
-                {
-                    <li>@item</li>
-                }
-            </ul>
-            <InputTextArea @bind-Value="model.Message"></InputTextArea>
-            <button type="button" @onclick="SendToGroup">Send</button>
-
-        </div>
-    </EditForm>
-</div>
 
 
 @code{
-    string[] users = new string[] { "201511099", "201511077", "201511088" };
 
-    string[] groups = new string[] { "Angkatan2011", "Angkatan2019"};
+    [Parameter]
+    public int Id { get; set; }
 
-    ArrayList MessageList = new ArrayList();
-    ArrayList GroupMessageList = new ArrayList();
 
     ChatModel model = new ChatModel();
+
+    protected override void OnInitialized()
+    {
+        chatService.SetCurrentRoom(Id);
+        chatService.OnRefresh += StateHasChanged;
+        this.StateHasChanged();
+
+    }
 
 
     async void Send()
     {
         try
         {
-
-            if(string.IsNullOrEmpty(model.Destination))
-                await chatService.Connection.InvokeAsync("SendMessage",model.UserName, model.Message);
-            else
-                await chatService.Connection.InvokeAsync("SendMessageTo",model.Destination, model.UserName, model.Message);
-
+            if (chatService.CurrentRoom!=null)
+                chatService.CurrentRoom.SendMessage(model.Message);
         }
         catch (Exception ex)
         {
-            MessageList.Add(ex.Message);
+            Console.WriteLine(ex.Message);
         }
         model.Message = "";
-        this.StateHasChanged();
-    }
+        await Task.Delay(1000);
 
-
-     async void SendToGroup()
-    {
-        try
-        {
-
-            if(string.IsNullOrEmpty(model.Group))
-                await chatService.Connection.InvokeAsync("SendToGroup",model.Group, model.UserName, model.Message);
-        }
-        catch (Exception ex)
-        {
-            MessageList.Add(ex.Message);
-        }
-        model.Message = "";
-        this.StateHasChanged();
-    }
-
-    async  void Connect()
-    {
-        chatService.Connect(model.UserName);
-        chatService.Connection.On<string, string>("ReceiveMessage", (user, message) =>
-        {
-            MessageList.Add($"{user} => {message} ");
-            this.StateHasChanged();
-        });
-
-        try
-        {
-            await chatService.Connection.StartAsync();
-            MessageList.Add("Connection started");
-            Connected = true;
-        }
-        catch (Exception ex)
-        {
-            MessageList.Add(ex.Message);
-        }
-        this.StateHasChanged();
     }
 
 }
+
+
+
+
+<style>
+
+    .mainRoom{
+        width:100%;
+    }
+    .sender{
+        margin:30px;
+        text-align:left;
+    }
+
+    .recieve{
+        
+        margin:30px;
+        text-align:right;
+    }
+</style>

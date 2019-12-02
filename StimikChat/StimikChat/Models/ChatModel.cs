@@ -10,7 +10,7 @@ namespace StimikChat.Models
 
         public string Group { get; set; }
         public string UserName { get; set; }
-        public string Destination { get; set; }
+        public int Destination { get; set; }
         public string Message { get; set; }
     }
 }

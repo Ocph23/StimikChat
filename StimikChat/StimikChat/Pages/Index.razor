@@ -1,5 +1,39 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using Models;
+@using Data;
+@using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Mvc;
+
+@inject AccountService accountService;
+@inject ChatService chatService;
+
+
+<h1>Login!</h1>
 Welcome to your new app.
+
+<EditForm Model="@exampleModel" OnValidSubmit="@Login">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    User Name
+    <InputText id="name" @bind-Value="exampleModel.Username" />
+
+    Password
+    <InputText id="password" @bind-Value="exampleModel.Password" />
+
+    <button type="submit">Submit</button>
+</EditForm>
+    
+@code{
+    private UserLoginModel exampleModel = new UserLoginModel();
+    private async void Login()
+    {
+        var service = new RestService();
+        var result = await service.Login(exampleModel);
+        if(result!=null)
+        {
+            accountService.Account = result;
+            chatService.Connect(result);
+        }
+    }
+}

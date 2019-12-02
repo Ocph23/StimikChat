@@ -1,13 +1,9 @@
-using System; 
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModelShared.Interfaces;
 using Ocph.DAL;
- 
- namespace StimikChatServer.Models.DataContext.ModelsData 
-{ 
-     [TableName("Groupuser")] 
+
+namespace StimikChatServer.Models.DataContext.ModelsData
+{
+    [TableName("GroupUser")] 
      public class Groupuser :IGroupuser  
    {
           [PrimaryKey("GroupId")] 

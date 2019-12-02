@@ -3,11 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StimikChat", "StimikChat\StimikChat.csproj", "{7420CFA6-21EB-41D4-94D0-5F5ED741768C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StimikChat", "StimikChat\StimikChat.csproj", "{7420CFA6-21EB-41D4-94D0-5F5ED741768C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StimikChatServer", "StimikChatServer\StimikChatServer.csproj", "{81B26BF7-66B7-423A-AAEF-11002372B0E8}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModelShared", "ModelShared\ModelShared.shproj", "{06907504-83FD-475B-99E5-69AA537DC4C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StimikChatServer", "StimikChatServer\StimikChatServer.csproj", "{6346BC16-70B8-4020-9388-EAA2169C4651}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModelShared\ModelShared.projitems*{06907504-83fd-475b-99e5-69aa537dc4c1}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -17,10 +22,10 @@ Global
 		{7420CFA6-21EB-41D4-94D0-5F5ED741768C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7420CFA6-21EB-41D4-94D0-5F5ED741768C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7420CFA6-21EB-41D4-94D0-5F5ED741768C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81B26BF7-66B7-423A-AAEF-11002372B0E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81B26BF7-66B7-423A-AAEF-11002372B0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81B26BF7-66B7-423A-AAEF-11002372B0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81B26BF7-66B7-423A-AAEF-11002372B0E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6346BC16-70B8-4020-9388-EAA2169C4651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6346BC16-70B8-4020-9388-EAA2169C4651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6346BC16-70B8-4020-9388-EAA2169C4651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6346BC16-70B8-4020-9388-EAA2169C4651}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

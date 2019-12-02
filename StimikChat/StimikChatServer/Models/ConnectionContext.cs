@@ -1,4 +1,5 @@
-﻿using StimikChatServer.Models.DataContext;
+﻿using ModelShared;
+using StimikChatServer.Models.DataContext;
 using StimikChatServer.Models.DataContext.ModelsData;
 using System;
 using System.Collections;
@@ -32,6 +33,7 @@ namespace StimikChatServer.Models
             {
                 using (var db = new OcphDbContext())
                 {
+                    db.Connections.Delete(x => x.UserId == user.UserId);
                     var contacts = db.Connections.Insert(new Connection {  UserId=user.UserId, ConnectionID=connectionId,Connected=true });
                     return Task.FromResult(contacts);
                 }
@@ -42,14 +44,15 @@ namespace StimikChatServer.Models
             }
         }
 
-        internal Task Remove(string connectionId)
+        internal Task<int> Remove(string connectionId)
         {
             try
             {
                 using (var db = new OcphDbContext())
                 {
+                    var user = db.Connections.Where(x =>x.ConnectionID == connectionId).FirstOrDefault();
                     var contacts = db.Connections.Delete(x=>x.ConnectionID==connectionId);
-                    return Task.FromResult(contacts);
+                    return Task.FromResult(user.UserId);
                 }
             }
             catch (Exception ex)
@@ -57,5 +60,6 @@ namespace StimikChatServer.Models
                 throw new SystemException(ex.Message);
             }
         }
+
     }
 }

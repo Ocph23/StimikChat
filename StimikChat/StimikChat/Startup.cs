@@ -28,8 +28,9 @@ namespace StimikChat
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
-            services.AddSingleton<ChatService>();
+            services.AddScoped<AccountService>();
+            services.AddScoped<ChatService>();
+            services.AddTransient<ContactService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

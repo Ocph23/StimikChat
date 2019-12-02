@@ -1,4 +1,5 @@
-﻿using StimikChatServer.Models.DataContext;
+﻿using ModelShared;
+using StimikChatServer.Models.DataContext;
 using StimikChatServer.Models.DataContext.ModelsData;
 using System;
 using System.Collections.Generic;
@@ -42,5 +43,23 @@ namespace StimikChatServer.Models
             }
         }
 
+        internal async void ReadedMessage(List<ConversationMessage> messages)
+        {
+            await Task.Delay(100);
+            try
+            {
+                using (var db = new OcphDbContext())
+                {
+                    foreach(var item in messages)
+                    {
+                        db.Conversations.Update(x => new { x.Readed }, new Conversation { MessageId = item.MessageId, Readed = item.Readed }, x => x.MessageId == item.MessageId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
+        }
     }
 }

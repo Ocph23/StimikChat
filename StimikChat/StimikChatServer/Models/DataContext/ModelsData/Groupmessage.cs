@@ -1,13 +1,10 @@
-using System; 
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using ModelShared.Interfaces;
 using Ocph.DAL;
- 
- namespace StimikChatServer.Models.DataContext.ModelsData 
-{ 
-     [TableName("Groupmessage")] 
+
+namespace StimikChatServer.Models.DataContext.ModelsData
+{
+    [TableName("GroupMessage")] 
      public class Groupmessage :IGroupmessage  
    {
           [PrimaryKey("RoomId")] 

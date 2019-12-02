@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ModelShared.Interfaces;
+using StimikChatServer.Models;
 
 namespace StimikChatServer.Controllers
 {
@@ -11,24 +13,33 @@ namespace StimikChatServer.Controllers
     [ApiController]
     public class ContactController : ControllerBase
     {
+        private HubContext hubContext;
+
+        public ContactController()
+        {
+              hubContext = new HubContext();
+        }
         // GET: api/Contact
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("{action}/{id}",Name ="GetContacts")]
+        public async Task<IEnumerable<IUser>> GetByOwenerId(int id)
         {
-            return new string[] { "value1", "value2" };
+            return await hubContext.Contacts.Get(id);
         }
 
-        // GET: api/Contact/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+
+
+        [HttpGet("{action}/{name}", Name = "Find")]
+        public async Task<IEnumerable<IUser>> Find(string name)
         {
-            return "value";
+            return await hubContext.Contacts.Find(name);
         }
 
-        // POST: api/Contact
-        [HttpPost]
-        public void Post([FromBody] string value)
+
+
+        [HttpGet("{action}/{ownerId}/{userId}", Name = "AddToContact")]
+        public async Task<bool> AddToContact(int ownerId,int userid)
         {
+            return await hubContext.Contacts.AddToContact(ownerId,userid);
         }
 
         // PUT: api/Contact/5

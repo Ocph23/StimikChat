@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>06907504-83fd-475b-99e5-69aa537dc4c1</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ModelShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Contact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConversationMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConversationType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IContact.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IContactitem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IConversation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGroupmessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGrouproom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGroupuser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IUser.cs" />
+  </ItemGroup>
+</Project>

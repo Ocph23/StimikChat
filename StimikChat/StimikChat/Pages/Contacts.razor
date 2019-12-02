@@ -2,3 +2,64 @@
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
+
+@using Models;
+
+@using ModelShared;
+
+@inject Data.AccountService accountService;
+@inject Data.ContactService contactService;
+@inject Data.ChatService chatService;
+
+<input @bind="search" />
+<button @onclick="searchAction">Cari</button>
+
+<div>
+    <ul>
+        @foreach (var item in searchResult)
+        {
+            <li>@item.FirstName<button @onclick="@(x=>AddToContactAction(item))"><span>add to contact</span></button></li>
+        }
+    </ul>
+</div>
+
+
+<ul>
+
+    @foreach (var item in chatService.ChatRooms)
+    {
+        <li>@item.FirstName <a href="/chat/@item.UserId">Chat</a></li>
+    }
+
+</ul>
+
+@code{
+
+    public string search { get; set; }
+    List<Contact> list = new List<Contact>();
+    List<Contact> searchResult { get; set; } = new List<Contact>();
+
+    protected override async void OnInitialized()
+    {
+        await Task.Delay(200);
+        this.StateHasChanged();
+    }
+
+    async void searchAction()
+    {
+        searchResult = await contactService.Find(search);
+        this.StateHasChanged();
+    }
+
+    async void AddToContactAction(Contact item)
+    {
+        var result = await contactService.AddToContact(accountService.Account.IdUser, item);
+        if (result)
+        {
+            accountService.Account.Contacts.Add(item);
+        }
+        this.StateHasChanged();
+    }
+
+
+}

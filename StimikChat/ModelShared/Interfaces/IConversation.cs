@@ -1,6 +1,6 @@
 using System;
  
- namespace StimikChatServer.Models
+ namespace ModelShared.Interfaces
 { 
      public interface IConversation  
    {
@@ -12,7 +12,7 @@ using System;
 
          DateTime Created {  get; set;} 
 
-         int Readed {  get; set;} 
+         bool Readed {  get; set;} 
 
      }
 }

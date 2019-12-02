@@ -1,6 +1,6 @@
 using System;
  
- namespace StimikChatServer.Models
+ namespace ModelShared.Interfaces
 { 
      public interface IGrouproom  
    {

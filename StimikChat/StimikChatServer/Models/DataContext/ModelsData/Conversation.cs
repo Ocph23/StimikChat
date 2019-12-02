@@ -1,33 +1,33 @@
-using System; 
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using ModelShared.Interfaces;
 using Ocph.DAL;
- 
- namespace StimikChatServer.Models.DataContext.ModelsData 
-{ 
-     [TableName("Conversation")] 
-     public class Conversation :IConversation  
-   {
-          [PrimaryKey("SenderId")] 
-          [DbColumn("SenderId")] 
-          public int SenderId {  get; set;} 
 
-          [PrimaryKey("RecieverId")] 
-          [DbColumn("RecieverId")] 
-          public int RecieverId {  get; set;} 
+namespace StimikChatServer.Models.DataContext.ModelsData
+{
+    [TableName("Conversation")]
+    public class Conversation : IConversation
+    {
 
-          [DbColumn("Message")] 
-          public string Message {  get; set;} 
+        [PrimaryKey("MessageId")]
+        [DbColumn("MessageId")]
+        public string MessageId { get; set; }
 
-          [DbColumn("Created")] 
-          public DateTime Created {  get; set;} 
+        [DbColumn("SenderId")]
+        public int SenderId { get; set; }
 
-          [DbColumn("Readed")] 
-          public int Readed {  get; set;} 
+        [DbColumn("RecieverId")]
+        public int RecieverId { get; set; }
 
-     }
+        [DbColumn("Message")]
+        public string Message { get; set; }
+
+        [DbColumn("Created")]
+        public DateTime Created { get; set; }
+
+        [DbColumn("Readed")]
+        public bool Readed { get; set; }
+
+    }
 }
 
 
