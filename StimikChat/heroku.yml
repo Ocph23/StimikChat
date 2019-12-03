@@ -1,3 +1,3 @@
 build:
   docker:
-    web:StimikChatServer/Dockerfile
+    web:/StimikChatServer/Dockerfile
