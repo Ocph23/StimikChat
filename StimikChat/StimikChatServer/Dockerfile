@@ -17,4 +17,4 @@ RUN dotnet publish "StimikChatServer.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "StimikChatServer.dll"]
+CMD  ["dotnet", "StimikChatServer.dll"]
