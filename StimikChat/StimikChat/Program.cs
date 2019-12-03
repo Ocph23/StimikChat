@@ -22,7 +22,9 @@ namespace StimikChat
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    var port = Environment.GetEnvironmentVariable("PORT");
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://*:" + port);
                 });
     }
 }

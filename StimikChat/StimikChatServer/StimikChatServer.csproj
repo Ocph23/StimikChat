@@ -17,8 +17,4 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
     <PackageReference Include="Ocph.DAL.MySql" Version="1.1.0" />
   </ItemGroup>
-
-  <Import Project="..\ModelShared\ModelShared.projitems" Label="Shared" />
-
-
 </Project>

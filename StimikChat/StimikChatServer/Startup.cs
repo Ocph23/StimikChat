@@ -18,12 +18,13 @@ namespace StimikChatServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddControllers();
             services.AddCors(options =>
             {
                 options.AddPolicy(
                   "CorsPolicy",
-                  builder => builder.WithOrigins("http://localhost:5500")
+                  builder => builder.WithOrigins("*")
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials()); ;
