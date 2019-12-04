@@ -1,73 +1,44 @@
 ﻿using Microsoft.Extensions.Primitives;
 using ModelShared;
+using ModelShared.Models;
+using MongoDB.Driver;
 using Newtonsoft.Json;
-using StimikChatServer.Models.DataContext;
-using StimikChatServer.Models.DataContext.ModelsData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StimikChatServer.Models.DataContext;
 
 namespace StimikChatServer.Models
 {
-    public class ContactContext
+    public class UserContext: IUserContext
     {
-        public Task<List<User>> Get(int ownerId)
+        private readonly IMongoCollection<User> _context;
+        public UserContext(IStimikChatDatabaseSettings settings)
+        {
+            var client = new MongoClient(settings.ConnectionString);
+            var database = client.GetDatabase(settings.DatabaseName);
+            _context = database.GetCollection<User>("Users");
+        }
+        public Task<User> GetUserByUserId(int ownerId)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var contacts = (from a in db.ContacItems.Where(x => x.ContactId == ownerId)
-                                    join b in db.Users.Select() on a.MemberId equals b.UserId
-                                    join c in db.Conversations.Where(x => x.SenderId == ownerId || x.RecieverId == ownerId)
-                                    on a.MemberId equals c.SenderId into revieves
-                                    join d in db.Conversations.Where(x => x.SenderId == ownerId || x.RecieverId == ownerId)
-                                    on a.MemberId equals d.RecieverId into sends
-                                    select new User
-                                    {
-                                        FirstName = b.FirstName,
-                                        Photo = b.Photo,
-                                        UserId = b.UserId,
-                                        UserName = b.UserName,
-                                        SendMessaage = sends,
-                                        RecieveMessage = revieves
-                                    }).ToList();
-                    foreach (var item in contacts)
-                    {
-                        var list = new List<ConversationMessage>();
-                        foreach (var data in item.SendMessaage)
-                        {
-                            list.Add(new ConversationMessage
-                            {
-                                Created = data.Created,
-                                Message = data.Message,
-                                MessageId = data.MessageId,
-                                Readed = data.Readed,
-                                RecieveId = data.RecieverId,
-                                SenderId = data.SenderId
-                            });
-                        }
+              return _context.Find(x => x.UserId == ownerId).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
+        }
 
-                        foreach (var data in item.RecieveMessage)
-                        {
-                            list.Add(new ConversationMessage
-                            {
-                                Created = data.Created,
-                                Message = data.Message,
-                                MessageId = data.MessageId,
-                                Readed = data.Readed,
-                                RecieveId = data.RecieverId,
-                                SenderId = data.SenderId
-                            });
-                        }
-
-                        item.Conversations = list.OrderBy(x => x.Created).ToList();
-                    }
-
-                    return Task.FromResult(contacts.ToList());
-
-                }
+        public async Task<List<Contact>> GetContactsByOwnerId(int ownerId)
+        {
+            try
+            {
+                await Task.Delay(200);
+                var data= await _context.Find(x => x.UserId == ownerId).FirstOrDefaultAsync();
+                return data.Contacts;
             }
             catch (Exception ex)
             {
@@ -79,13 +50,8 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var contacts = from a in db.Users.Select().Where(x => x.UserName.ToLower().Contains(data.ToLower()) 
-                                   || x.FirstName.ToLower().Contains(data.ToLower()))
-                                   select a;
-                    return Task.FromResult(contacts.ToList());
-                }
+
+                return _context.Find(x => x.FirstName.ToLower().Contains(data.ToLower()) || x.UserName.Contains(data)).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -93,33 +59,22 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<bool> AddToContact(int userOwner, int userId)
+        public async Task<User> AddToContact(int userOwner, int userId)
         {
-            var data = new Contactitem { ContactId = userOwner, MemberId = userId };
-            try
-            {
-                using (var db = new OcphDbContext())
-                {
-                    var result = db.ContacItems.Insert(data);
+            var data = _context.Find(x => x.UserId == userOwner).FirstOrDefault();
+            var newUser = _context.Find(x => x.UserId == userId).FirstOrDefault();
 
-                    return Task.FromResult(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new SystemException(ex.Message);
-            }
+            data.Contacts.Add(new Contact { UserId=newUser.UserId, UserName=newUser.UserName, FirstName=newUser.FirstName });
+
+            return await _context.FindOneAndReplaceAsync(x=>x.UserId==data.UserId, data);
+
         }
 
-        internal Task<User> GetBayUserName(int userName)
+        public Task<User> GetByUserId(int userName)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var contacts = db.Users.Where(x => x.UserId == userName).FirstOrDefault();
-                    return Task.FromResult(contacts);
-                }
+                return _context.Find(x => x.UserId == userName).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -127,7 +82,7 @@ namespace StimikChatServer.Models
             }
         }
 
-        internal async Task<User> CreateUser(string userToken)
+        public async Task<User> CreateUser(string userToken)
         {
             try
             {
@@ -143,13 +98,11 @@ namespace StimikChatServer.Models
                         if (mahasiswas != null && mahasiswas.Count > 0)
                         {
                             var mahasiswa = mahasiswas.FirstOrDefault();
-                            using (var db = new OcphDbContext())
-                            {
-                                var result = new User { FirstName = mahasiswa.Nmmhs, UserId = mahasiswa.IdUser, UserName = mahasiswa.Npm };
-                                db.Users.Insert(result);
-                                db.Contacs.Insert(new ContactDto { UserId = result.UserId, Created = DateTime.Now });
-                                return result;
-                            }
+                            var model = new User { FirstName = mahasiswa.Nmmhs, UserId = mahasiswa.IdUser, UserName = mahasiswa.Npm, Contacts=new List<Contact>() };
+                            model.Id = Guid.NewGuid().ToString();
+                            var op = new InsertOneOptions();
+                            await _context.InsertOneAsync(model);
+                            return model;
                         }
                         else
                             throw new SystemException("Anda Tidak Memiliki Profile");
@@ -166,16 +119,14 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<bool> RemoveFromContact(int userOwner, int userId)
+        public Task<User> RemoveFromContact(int userOwner, int userId)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = db.ContacItems.Delete(x => x.ContactId == userOwner && x.MemberId == userId);
-
-                    return Task.FromResult(result);
-                }
+                var data = _context.Find(x => x.UserId == userOwner).FirstOrDefault();
+                var removeData =data.Contacts.Where(x=>x.UserId==userId).FirstOrDefault();
+                data.Contacts.Remove(removeData);
+               return _context.FindOneAndReplaceAsync(x => x.UserId == data.UserId, data);
             }
             catch (Exception ex)
             {
@@ -184,6 +135,18 @@ namespace StimikChatServer.Models
         }
 
 
+    }
+
+    public interface IUserContext
+    {
+        Task<User> GetUserByUserId(int ownerId);
+        Task<List<Contact>> GetContactsByOwnerId(int ownerId);
+        Task<List<User>> Find(string data);
+
+        Task<User> AddToContact(int userOwner, int userId);
+        Task<User> GetByUserId(int userName);
+        Task<User> CreateUser(string userToken);
+        Task<User> RemoveFromContact(int userOwner, int userId);
     }
 
 

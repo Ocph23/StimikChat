@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using ModelShared;
+using ModelShared.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,9 +36,9 @@ namespace StimikChat.Data
                 .WithUrl($"https://localhost:44360/chatHub?userid={MyAccount.IdUser}&&token={MyAccount.Token}")
                 .Build();
 
-            Connection.On<ConversationMessage>("ReceiveMessageFrom", OnRecieveMessageFrom);
-            Connection.On<ConversationMessage>("ReceiveMessage", OnRecieveMessage);
-            Connection.On <List<ConversationMessage>>("OnReadMessage", OnReadMessage);
+            Connection.On<Conversation>("ReceiveMessageFrom", OnRecieveMessageFrom);
+            Connection.On<Conversation>("ReceiveMessage", OnRecieveMessage);
+            Connection.On <List<Conversation>>("OnReadMessage", OnReadMessage);
 
             Connection.Closed += Connection_Closed;
             await Connection.StartAsync();
@@ -49,7 +50,7 @@ namespace StimikChat.Data
 
         #endregion
 
-        private void OnReadMessage(List<ConversationMessage> obj)
+        private void OnReadMessage(List<Conversation> obj)
         {
             var messages = from a in ChatRooms.SelectMany(x => x.Conversations)
                            join d in obj on a.SenderId equals d.SenderId
@@ -62,7 +63,7 @@ namespace StimikChat.Data
             Refresh();
         }
 
-        private void OnRecieveMessage(ConversationMessage obj)
+        private void OnRecieveMessage(Conversation obj)
         {
             //inbox Broadcase
             if (CurrentRoom != null && obj.SenderId == CurrentRoom.UserId)
@@ -72,13 +73,13 @@ namespace StimikChat.Data
             }
         }
 
-        private async void OnRecieveMessageFrom(ConversationMessage obj)
+        private async void OnRecieveMessageFrom(Conversation obj)
         {
             if (CurrentRoom != null && obj.SenderId == CurrentRoom.UserId)
             {
                 obj.Readed = true;
                 CurrentRoom.Conversations.Add(obj);
-                await  ReadMessage(new List<ConversationMessage> { obj });
+                await  ReadMessage(new List<Conversation> { obj });
                 Refresh();
             }
             else
@@ -99,11 +100,14 @@ namespace StimikChat.Data
         {
             var   contactService = new ContactService();
             var result = await contactService.GetContacts(MyAccount.IdUser);
-            foreach(var item in result)
+            if (result != null)
             {
-                var room = new ConversationRoom(ConversationType.Chat, MyAccount, item);
-                room.OnSendMessage += Room_OnSendMessage;
-                ChatRooms.Add(room);
+                foreach (var item in result)
+                {
+                    var room = new ConversationRoom(ConversationType.Chat, MyAccount, item);
+                    room.OnSendMessage += Room_OnSendMessage;
+                    ChatRooms.Add(room);
+                }
             }
         }
 
@@ -116,7 +120,7 @@ namespace StimikChat.Data
             }
         }
 
-        private void Room_OnSendMessage(ConversationMessage message)
+        private void Room_OnSendMessage(Conversation message)
         {
             SendMessageTo(message);
         }
@@ -137,7 +141,7 @@ namespace StimikChat.Data
             }
         }
 
-        public async void SendMessageTo(ConversationMessage message)
+        public async void SendMessageTo(Conversation message)
         {
             try
             {
@@ -152,7 +156,7 @@ namespace StimikChat.Data
                 throw new SystemException(ex.Message);
             }
         }
-        private async Task ReadMessage(List<ConversationMessage> messages)
+        private async Task ReadMessage(List<Conversation> messages)
         {
             try
             {
@@ -203,7 +207,7 @@ namespace StimikChat.Data
         }
     }
 
-    public delegate void SendMessage(ConversationMessage message);
+    public delegate void SendMessage(Conversation message);
     public class ConversationRoom :Contact
     {
         public event SendMessage OnSendMessage;
@@ -227,11 +231,11 @@ namespace StimikChat.Data
         public void SendMessage(string message)
         {
             var guidId = Guid.NewGuid().ToString();
-            var messageData= new ConversationMessage
+            var messageData= new Conversation
             {
                 MessageId = $"{myAccount.IdUser}{UserId}{guidId}",
                 SenderId = myAccount.IdUser,
-                RecieveId = UserId,
+                RecieverId= UserId,
                 Message = message
             };
 

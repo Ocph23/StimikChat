@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using ModelShared;
 using ModelShared.Interfaces;
+using ModelShared.Models;
 using StimikChatServer.Models;
-using StimikChatServer.Models.DataContext.ModelsData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +12,32 @@ namespace StimikChatServer
 {
     public class ChatHub : Hub
     {
-        private HubContext hubContext = new HubContext();
-        public async Task SendMessage(ConversationMessage message)
+        private IChatContext chatContext;
+        private IConnectionContext connectionContext;
+        private IUserContext userContext;
+
+        public ChatHub(IChatContext _chatContext, IConnectionContext _connection, IUserContext _userContext)
+        {
+            chatContext = _chatContext;
+            connectionContext = _connection;
+            userContext = _userContext;
+        }
+
+        public async Task SendMessage(Conversation message)
         {
             await Clients.All.SendAsync("ReceiveMessage", message);
         }
-        public async Task SendMessageTo(ConversationMessage message)
+        public async Task SendMessageTo(Conversation message)
         {
             try
             {
-                var connection = await hubContext.Connections.GetConnectionByUserId(message.RecieveId);
+                var connection = await connectionContext.GetConnectionByUserId(message.RecieverId);
                 if (connection != null)
                     await Clients.Client(connection.ConnectionID).SendAsync("ReceiveMessageFrom",  message);
                 else
                     this.SendByPushNotification(message.SenderId, message.Message);
-                await hubContext.Conversations.AddMessageMyConversation(new Conversation 
-                { MessageId=message.MessageId, Created = DateTime.Now, Message = message.Message, Readed = false, SenderId = message.SenderId, RecieverId = message.RecieveId });
+                await chatContext.AddMessageMyConversation(new Conversation 
+                { MessageId=message.MessageId, Created = DateTime.Now, Message = message.Message, Readed = false, SenderId = message.SenderId, RecieverId = message.RecieverId});
 
             }
             catch (Exception ex)
@@ -37,18 +47,18 @@ namespace StimikChatServer
         }
 
 
-        public async Task ReadMessage(List<ConversationMessage> messages)
+        public async Task ReadMessage(List<Conversation> messages)
         {
             try
             {
                 var defaultMessage = messages.FirstOrDefault();
                 if(defaultMessage!=null)
                 {
-                    var connection = await hubContext.Connections.GetConnectionByUserId(defaultMessage.SenderId);
+                    var connection = await connectionContext.GetConnectionByUserId(defaultMessage.SenderId);
                     if (connection != null)
                         await Clients.Client(connection.ConnectionID).SendAsync("OnReadMessage", messages);
 
-                    hubContext.Conversations.ReadedMessage(messages);
+                  await  chatContext.ReadedMessage(messages);
                 }
             }
             catch (Exception ex)
@@ -70,10 +80,10 @@ namespace StimikChatServer
         public async Task CreateGroup(string groupName)
         {
             var userId = Convert.ToInt32(Context.GetHttpContext().Request.Query["userid"]);
-            IUser user = await hubContext.Contacts.GetBayUserName(userId);
+            IUser user = await userContext.GetByUserId(userId);
             if (user != null)
             {
-                await hubContext.Groups.CreateGroup(user.UserId, groupName);
+                //await hubContext.Groups.CreateGroup(user.UserId, groupName);
             }
         }
 
@@ -102,19 +112,19 @@ namespace StimikChatServer
                 var userId = Convert.ToInt32(Context.GetHttpContext().Request.Query["userid"]);
                 string token = Context.GetHttpContext().Request.Query["token"];
 
-                var user = hubContext.Contacts.GetBayUserName(userId).Result;
+                var user = userContext.GetByUserId(userId).Result;
                 if (user == null)
                 {
-                    user = hubContext.Contacts.CreateUser(token).Result;
+                    user = userContext.CreateUser(token).Result;
                 }
 
-                hubContext.Connections.AddUser(user, Context.ConnectionId).Wait();
+                connectionContext.AddUser(user, Context.ConnectionId);
                
-                var rooms = hubContext.Groups.GetGroupsByUserId(user.UserId).Result;
+                /*var rooms = hubContext.Groups.GetGroupsByUserId(user.UserId).Result;
                 foreach (var item in rooms)
                 {
                     Groups.AddToGroupAsync(Context.ConnectionId, item.GroupName).Wait();
-                }
+                }*/
 
                 OnUserChangeOnlineStatus(user.UserId, true);
             }
@@ -129,8 +139,8 @@ namespace StimikChatServer
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            int userId = hubContext.Connections.Remove(Context.ConnectionId).Result;
-            OnUserChangeOnlineStatus(userId, false);
+            Connection con = connectionContext.Remove(Context.ConnectionId).Result;
+            OnUserChangeOnlineStatus(con.UserId, false);
             return base.OnDisconnectedAsync(exception);
         }
 

@@ -1,5 +1,4 @@
-﻿using StimikChatServer.Models.DataContext;
-using StimikChatServer.Models.DataContext.ModelsData;
+﻿using ModelShared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +12,15 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    IEnumerable<Grouproom> result = from a in db.GroupMember.Where(x => x.UserId== userId).ToList()
-                                 join b in db.Groups.Select() on a.GroupId equals b.GroupId
-                                 select b;
-                    return Task.FromResult(result);
-                }
+                /*  using (var db = new OcphDbContext())
+                  {
+                      IEnumerable<Grouproom> result = from a in db.GroupMember.Where(x => x.UserId== userId).ToList()
+                                   join b in db.Groups.Select() on a.GroupId equals b.GroupId
+                                   select b;
+                      return Task.FromResult(result);
+                  }*/
+
+                return Task.FromResult(default(IEnumerable<Grouproom>));
             }
             catch (Exception ex)
             {
@@ -27,16 +28,11 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<List<Grouproom>> GetGroups(int groupid)
+        public Task<IEnumerable<Grouproom>> GetGroups(int groupid)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = from a in db.Groups.Where(x=>x.GroupId==groupid).ToList()
-                                   select a;
-                    return Task.FromResult(result.ToList());
-                }
+                return Task.FromResult(default(IEnumerable<Grouproom>));
             }
             catch (Exception ex)
             {
@@ -48,13 +44,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = from a in db.GroupMember.Where(x => x.GroupId == groupid).ToList()
-                                 join b in db.Users.Select() on a.UserId equals b.UserId
-                                 select b;
-                    return Task.FromResult(result.ToList());
-                }
+                return Task.FromResult(default(List<User>));
             }
             catch (Exception ex)
             {
@@ -68,12 +58,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var contacts = from a in db.Groups.Where(x => x.GroupName.Contains(groupName))
-                                   select a;
-                    return Task.FromResult(contacts.ToList());
-                }
+                return Task.FromResult(default(List<Grouproom>));
             }
             catch (Exception ex)
             {
@@ -86,12 +71,7 @@ namespace StimikChatServer.Models
             var data = new Groupuser { GroupId = groupId,   UserId= userId };
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = db.GroupMember.Insert(data);
-
-                    return Task.FromResult(result);
-                }
+                return Task.FromResult(false);
             }
             catch (Exception ex)
             {
@@ -103,12 +83,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = db.GroupMember.Delete(x => x.GroupId == groupId&& x.UserId== userId);
-
-                    return Task.FromResult(result);
-                }
+                return Task.FromResult(false);
             }
             catch (Exception ex)
             {
@@ -121,12 +96,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    IEnumerable<Groupmessage> result = db.GroupMessages.Where(x => x.GroupId == groupId);
-
-                    return Task.FromResult(result);
-                }
+                return Task.FromResult(default(IEnumerable<Groupmessage>));
             }
             catch (Exception ex)
             {
@@ -138,12 +108,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                   var  result = db.GroupMessages.Insert(message);
-
-                    return Task.FromResult(result);
-                }
+                return Task.FromResult(false);
             }
             catch (Exception ex)
             {
@@ -155,13 +120,7 @@ namespace StimikChatServer.Models
         {
             try
             {
-                var model = new Grouproom { GroupName = groupName, Created=DateTime.Now, OwnerId= owner};
-                using (var db = new OcphDbContext())
-                {
-                    model.GroupId = db.Groups.InsertAndGetLastID(model);
-
-                    return Task.FromResult(model);
-                }
+                return Task.FromResult(default(Grouproom));
             }
             catch (Exception ex)
             {

@@ -1,20 +1,10 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
-WORKDIR /src
-COPY ["StimikChatServer/StimikChatServer.csproj", "StimikChatServer/"]
-RUN dotnet restore "StimikChatServer/StimikChatServer.csproj"
-COPY . .
-WORKDIR "/src/StimikChatServer"
-RUN dotnet build "StimikChatServer.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "StimikChatServer.csproj" -c Release -o /app/publish
-
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY ./ ./
+
+RUN dotnet publish -c Release -o out
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim
+WORKDIR /app
+COPY --from=build /app/out .
 CMD ASPNETCORE_URLS=http://*:$PORT dotnet StimikChatServer.dll

@@ -1,4 +1,5 @@
 ﻿using ModelShared;
+using ModelShared.Models;
 using Newtonsoft.Json;
 using StimikChat.Models;
 using System;
@@ -10,11 +11,12 @@ namespace StimikChat.Data
 {
     public class ContactService
     {
+        private string chatServerUrl = "https://localhost:44360";
         public async Task<IEnumerable<Contact>> GetContacts(int id)
         {
             try
             {
-                using (var service = new RestService("https://localhost:44360"))
+                using (var service = new RestService(chatServerUrl))
                 {
                    var resonse= await service.GetAsync($"api/contact/GetByOwenerId/{id}");
                     if(resonse.IsSuccessStatusCode)
@@ -37,7 +39,7 @@ namespace StimikChat.Data
         {
             try
             {
-                using (var service = new RestService("https://localhost:44360"))
+                using (var service = new RestService(chatServerUrl))
                 {
                     var resonse = await service.GetAsync($"api/contact/Find/{data}");
                     if (resonse.IsSuccessStatusCode)
@@ -60,14 +62,14 @@ namespace StimikChat.Data
         {
             try
             {
-                using (var service = new RestService("https://localhost:44360"))
+                using (var service = new RestService(chatServerUrl))
                 {
                     var resonse = await service.GetAsync($"api/contact/addtocontact/{ownerId}/{data.UserId}");
                     if (resonse.IsSuccessStatusCode)
                     {
                         var stringResult = await resonse.Content.ReadAsStringAsync();
-                        var datas = JsonConvert.DeserializeObject<bool>(stringResult);
-                        return datas;
+                        var datas = JsonConvert.DeserializeObject<User>(stringResult);
+                        return true;
                     }
 
                     return default(bool);

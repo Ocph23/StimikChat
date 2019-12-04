@@ -12,5 +12,7 @@ namespace StimikChat.Models
         public string UserName { get; set; }
         public int Destination { get; set; }
         public string Message { get; set; }
+
+      
     }
 }

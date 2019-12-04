@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ModelShared.Interfaces;
+using ModelShared.Models;
 
 namespace ModelShared
 {
@@ -13,7 +14,11 @@ namespace ModelShared
         public string FirstName { get; set; }
 
         public string Photo { get; set; }
-        public List<ConversationMessage> Conversations { get; set; } = new List<ConversationMessage>();
+
+   
+        public DateTime Created { get; internal set; }
+
+        public List<Conversation> Conversations { get; set; } = new List<Conversation>();
     }
 }
 

@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Contact.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ConversationMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConversationType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IConnection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IContact.cs" />
@@ -20,5 +19,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGrouproom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IGroupuser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Connection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Contactitem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Conversation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Groupmessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Grouproom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Groupuser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\User.cs" />
   </ItemGroup>
 </Project>

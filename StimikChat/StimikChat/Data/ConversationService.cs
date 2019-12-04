@@ -1,4 +1,5 @@
 ﻿using ModelShared;
+using ModelShared.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace StimikChat.Data
 {
     public class ConversationService
     {
-        public async Task<List<ConversationMessage>> GetConversations(int id)
+        public async Task<List<Conversation>> GetConversations(int id)
         {
             try
             {
@@ -19,11 +20,11 @@ namespace StimikChat.Data
                     if (resonse.IsSuccessStatusCode)
                     {
                         var stringResult = await resonse.Content.ReadAsStringAsync();
-                        var datas = JsonConvert.DeserializeObject<List<ConversationMessage>>(stringResult);
+                        var datas = JsonConvert.DeserializeObject<List<Conversation>>(stringResult);
                         return datas;
                     }
 
-                    return default(List<ConversationMessage>);
+                    return default(List<Conversation>);
                 }
             }
             catch (Exception ex)

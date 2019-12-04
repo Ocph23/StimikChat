@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ModelShared;
+using ModelShared.Models;
 using StimikChatServer.Models;
-using StimikChatServer.Models.DataContext.ModelsData;
 
 namespace StimikChatServer.Controllers
 {
@@ -14,17 +14,17 @@ namespace StimikChatServer.Controllers
     [ApiController]
     public class ConversationController : ControllerBase
     {
-        private HubContext hubContext;
+        private IChatContext chatContext;
 
-        public ConversationController()
+        public ConversationController(IChatContext context)
         {
-            hubContext = new HubContext();
+            chatContext = context;
         }
         // GET: api/Conversation/5
         [HttpGet("{id}", Name = "Get")]
         public async Task<IEnumerable<Conversation>> Get(int id)
         {
-            return await hubContext.Conversations.GetConversation(id);
+            return await chatContext.GetConversation(id);
         }
 
         // POST: api/Conversation

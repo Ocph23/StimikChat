@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ModelShared;
 using ModelShared.Interfaces;
+using ModelShared.Models;
 using StimikChatServer.Models;
 
 namespace StimikChatServer.Controllers
@@ -13,33 +15,35 @@ namespace StimikChatServer.Controllers
     [ApiController]
     public class ContactController : ControllerBase
     {
-        private HubContext hubContext;
+        private IUserContext context;
 
-        public ContactController()
+        public ContactController(IUserContext _userContext)
         {
-              hubContext = new HubContext();
+            context = _userContext;
         }
+
+
         // GET: api/Contact
         [HttpGet("{action}/{id}",Name ="GetContacts")]
-        public async Task<IEnumerable<IUser>> GetByOwenerId(int id)
+        public async Task<IEnumerable<Contact>> GetByOwenerId(int id)
         {
-            return await hubContext.Contacts.Get(id);
+            return await context.GetContactsByOwnerId(id);
         }
 
 
 
         [HttpGet("{action}/{name}", Name = "Find")]
-        public async Task<IEnumerable<IUser>> Find(string name)
+        public async Task<IEnumerable<User>> Find(string name)
         {
-            return await hubContext.Contacts.Find(name);
+            return await context.Find(name);
         }
 
 
 
         [HttpGet("{action}/{ownerId}/{userId}", Name = "AddToContact")]
-        public async Task<bool> AddToContact(int ownerId,int userid)
+        public async Task<User> AddToContact(int ownerId,int userid)
         {
-            return await hubContext.Contacts.AddToContact(ownerId,userid);
+            return await context.AddToContact(ownerId,userid);
         }
 
         // PUT: api/Contact/5

@@ -8,13 +8,13 @@ namespace StimikChatServer.Models
     public class HubContext
     {
 
-        public ChatContext Conversations { get { return new ChatContext(); } }
+    /*    public ChatContext Conversations { get { return new ChatContext(); } }
 
         public GroupContext Groups { get { return new GroupContext(); } }
 
-        public ContactContext Contacts { get { return new ContactContext(); } }
+        public UserContext Contacts { get { return new UserContext(); } }
 
-        public ConnectionContext Connections { get { return new ConnectionContext(); } }
+        public ConnectionContext Connections { get { return new ConnectionContext(); } }*/
 
     }
 }

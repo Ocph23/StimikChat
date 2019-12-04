@@ -1,3 +1,4 @@
+using ModelShared.Models;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +13,9 @@ namespace ModelShared.Interfaces
          string FirstName {  get; set;} 
 
          string Photo {  get; set;}
-         List<ConversationMessage> Conversations { get; set; }
+
+         List<Conversation> Conversations { get; set; }
+
 
     }
 }

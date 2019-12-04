@@ -1,24 +1,27 @@
 ﻿using ModelShared;
+using ModelShared.Models;
+using MongoDB.Driver;
 using StimikChatServer.Models.DataContext;
-using StimikChatServer.Models.DataContext.ModelsData;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace StimikChatServer.Models
 {
-    public class ChatContext
+    public class ChatContext:IChatContext
     {
-        public Task<IEnumerable<Conversation>> GetConversation(int owner)
+        private readonly IMongoCollection<Conversation> _context;
+        public ChatContext(IStimikChatDatabaseSettings settings)
+        {
+            var client = new MongoClient(settings.ConnectionString);
+            var database = client.GetDatabase(settings.DatabaseName);
+            _context = database.GetCollection<Conversation>("Conversation");
+        }
+        public Task<List<Conversation>> GetConversation(int owner)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    IEnumerable<Conversation> result = db.Conversations.Where(x => x.SenderId == owner || x.RecieverId==owner);
-
-                    return Task.FromResult(result);
-                }
+                return _context.Find<Conversation>(x => x.SenderId == owner || x.RecieverId==owner).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -26,16 +29,12 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<bool> AddMessageMyConversation(Conversation message)
+        public Task  AddMessageMyConversation(Conversation message)
         {
             try
             {
-                using (var db = new OcphDbContext())
-                {
-                    var result = db.Conversations.Insert(message);
 
-                    return Task.FromResult(result);
-                }
+               return _context.InsertOneAsync(message);
             }
             catch (Exception ex)
             {
@@ -43,23 +42,29 @@ namespace StimikChatServer.Models
             }
         }
 
-        internal async void ReadedMessage(List<ConversationMessage> messages)
+
+        public Task ReadedMessage(List<Conversation> messages)
         {
-            await Task.Delay(100);
             try
             {
-                using (var db = new OcphDbContext())
+                foreach (var item in messages)
                 {
-                    foreach(var item in messages)
-                    {
-                        db.Conversations.Update(x => new { x.Readed }, new Conversation { MessageId = item.MessageId, Readed = item.Readed }, x => x.MessageId == item.MessageId);
-                    }
+                    _context.ReplaceOne(x => x.MessageId==item.MessageId, item);
                 }
+
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
                 throw new SystemException(ex.Message);
             }
         }
+    }
+
+    public interface IChatContext
+    {
+        Task ReadedMessage(List<Conversation> messages);
+        Task AddMessageMyConversation(Conversation message);
+        Task<List<Conversation>> GetConversation(int owner);
     }
 }
