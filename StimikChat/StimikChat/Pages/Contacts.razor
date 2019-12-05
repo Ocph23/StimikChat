@@ -7,6 +7,8 @@
 
 @using ModelShared;
 
+@using ModelShared.Interfaces;
+
 @inject Data.AccountService accountService;
 @inject Data.ContactService contactService;
 @inject Data.ChatService chatService;
@@ -47,13 +49,15 @@
 
     async void searchAction()
     {
-        searchResult = await contactService.Find(search);
+        var datas = await contactService.Find(search);
+        if (datas != null)
+            searchResult = datas;
         this.StateHasChanged();
     }
 
     async void AddToContactAction(Contact item)
     {
-        var result = await contactService.AddToContact(accountService.Account.IdUser, item);
+        var result = await contactService.AddToContact(accountService.Account.IdUser,item);
         if (result)
         {
             accountService.Account.Contacts.Add(item);

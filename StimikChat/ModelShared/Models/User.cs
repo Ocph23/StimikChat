@@ -9,6 +9,7 @@ namespace ModelShared.Models
 {
     public class User : IUser
     {
+        [JsonIgnore]
         public string Id { get; set; }
         public int UserId { get; set; }
 
@@ -19,11 +20,6 @@ namespace ModelShared.Models
         public string Photo { get; set; }
 
         public List<Contact> Contacts { get; set; }
-
-        [BsonIgnore]
-        [JsonIgnore]
-        public List<Conversation> Conversations { get; set; }
-
     }
 }
 

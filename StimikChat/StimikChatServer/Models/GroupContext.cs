@@ -8,7 +8,7 @@ namespace StimikChatServer.Models
 {
     public class GroupContext
     {
-        public Task<IEnumerable<Grouproom>> GetGroupsByUserId(int userId)
+        public Task<IEnumerable<ChatRoom>> GetGroupsByUserId(int userId)
         {
             try
             {
@@ -20,7 +20,7 @@ namespace StimikChatServer.Models
                       return Task.FromResult(result);
                   }*/
 
-                return Task.FromResult(default(IEnumerable<Grouproom>));
+                return Task.FromResult(default(IEnumerable<ChatRoom>));
             }
             catch (Exception ex)
             {
@@ -28,11 +28,11 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<IEnumerable<Grouproom>> GetGroups(int groupid)
+        public Task<IEnumerable<ChatRoom>> GetGroups(int groupid)
         {
             try
             {
-                return Task.FromResult(default(IEnumerable<Grouproom>));
+                return Task.FromResult(default(IEnumerable<ChatRoom>));
             }
             catch (Exception ex)
             {
@@ -54,11 +54,11 @@ namespace StimikChatServer.Models
 
 
 
-        public Task<List<Grouproom>> Find(string groupName)
+        public Task<List<ChatRoom>> Find(string groupName)
         {
             try
             {
-                return Task.FromResult(default(List<Grouproom>));
+                return Task.FromResult(default(List<ChatRoom>));
             }
             catch (Exception ex)
             {
@@ -116,11 +116,11 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<Grouproom>CreateGroup(int owner ,string groupName)
+        public Task<ChatRoom>CreateGroup(int owner ,string groupName)
         {
             try
             {
-                return Task.FromResult(default(Grouproom));
+                return Task.FromResult(default(ChatRoom));
             }
             catch (Exception ex)
             {

@@ -10,7 +10,7 @@ namespace StimikChat.Data
 {
     public class ConversationService
     {
-        public async Task<List<Conversation>> GetConversations(int id)
+        public async Task<List<ChatMessage>> GetConversations(int id)
         {
             try
             {
@@ -20,11 +20,11 @@ namespace StimikChat.Data
                     if (resonse.IsSuccessStatusCode)
                     {
                         var stringResult = await resonse.Content.ReadAsStringAsync();
-                        var datas = JsonConvert.DeserializeObject<List<Conversation>>(stringResult);
+                        var datas = JsonConvert.DeserializeObject<List<ChatMessage>>(stringResult);
                         return datas;
                     }
 
-                    return default(List<Conversation>);
+                    return default(List<ChatMessage>);
                 }
             }
             catch (Exception ex)

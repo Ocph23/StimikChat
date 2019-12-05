@@ -14,7 +14,8 @@ namespace ModelShared.Interfaces
 
          string Photo {  get; set;}
 
-         List<Conversation> Conversations { get; set; }
+            List<Contact> Contacts { get; set; }
+
 
 
     }

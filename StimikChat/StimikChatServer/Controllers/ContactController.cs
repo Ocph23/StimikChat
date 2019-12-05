@@ -41,7 +41,7 @@ namespace StimikChatServer.Controllers
 
 
         [HttpGet("{action}/{ownerId}/{userId}", Name = "AddToContact")]
-        public async Task<User> AddToContact(int ownerId,int userid)
+        public async Task<bool> AddToContact(int ownerId,int userid)
         {
             return await context.AddToContact(ownerId,userid);
         }

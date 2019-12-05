@@ -68,8 +68,7 @@ namespace StimikChat.Data
                     if (resonse.IsSuccessStatusCode)
                     {
                         var stringResult = await resonse.Content.ReadAsStringAsync();
-                        var datas = JsonConvert.DeserializeObject<User>(stringResult);
-                        return true;
+                        return JsonConvert.DeserializeObject<bool>(stringResult);
                     }
 
                     return default(bool);

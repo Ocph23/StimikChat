@@ -21,10 +21,10 @@ namespace StimikChatServer.Controllers
             chatContext = context;
         }
         // GET: api/Conversation/5
-        [HttpGet("{id}", Name = "Get")]
-        public async Task<IEnumerable<Conversation>> Get(int id)
+        [HttpGet("{senderId}/recieverId", Name = "Get")]
+        public async Task<ChatRoom> Get(int senderId, int recieverId)
         {
-            return await chatContext.GetConversation(id);
+            return await chatContext.GetConversation(senderId, senderId);
         }
 
         // POST: api/Conversation

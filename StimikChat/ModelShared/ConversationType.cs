@@ -6,6 +6,6 @@ namespace ModelShared
 {
     public enum ConversationType
     {
-        Chat, Group, Broadcase
+        Private, Group, Broadcase
     }
 }

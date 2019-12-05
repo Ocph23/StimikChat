@@ -14,11 +14,14 @@ namespace StimikChatServer.Models
     public class UserContext: IUserContext
     {
         private readonly IMongoCollection<User> _context;
+        private readonly IMongoCollection<ChatRoom> _chatContext;
+
         public UserContext(IStimikChatDatabaseSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DatabaseName);
             _context = database.GetCollection<User>("Users");
+            _chatContext = database.GetCollection<ChatRoom>("Rooms");
         }
         public Task<User> GetUserByUserId(int ownerId)
         {
@@ -59,15 +62,67 @@ namespace StimikChatServer.Models
             }
         }
 
-        public async Task<User> AddToContact(int userOwner, int userId)
+        public Task<bool> AddToContact(int SenderId, int RecieverId)
         {
-            var data = _context.Find(x => x.UserId == userOwner).FirstOrDefault();
-            var newUser = _context.Find(x => x.UserId == userId).FirstOrDefault();
+            try
+            {
+                var opts = new UpdateOptions()
+                {
+                    IsUpsert = true
+                };
 
-            data.Contacts.Add(new Contact { UserId=newUser.UserId, UserName=newUser.UserName, FirstName=newUser.FirstName });
+                //add recieve to sender
+                var model1 = _context.Find(x => x.UserId == SenderId).FirstOrDefault();
+                var model2 = _context.Find(x => x.UserId == RecieverId).FirstOrDefault();
 
-            return await _context.FindOneAndReplaceAsync(x=>x.UserId==data.UserId, data);
 
+                var filter1 = Builders<User>.Filter.And(Builders<User>.Filter.Eq(x => x.UserId, SenderId),
+                    Builders<User>.Filter.ElemMatch(x => x.Contacts, x => x.UserId == RecieverId));
+                var data1 = Builders<User>.Update.Push(x => x.Contacts, new Contact
+                {
+                    Created = DateTime.Now,
+                    UserId = model2.UserId,
+                    FirstName = model2.FirstName,
+                    UserName = model2.UserName,
+                    Photo = model2.Photo
+                });
+
+                //add sender to sender
+                var filter2 = Builders <User> .Filter.And(Builders<User>.Filter.Eq(x => x.UserId, RecieverId),
+                    Builders<User>.Filter.ElemMatch(x => x.Contacts, x => x.UserId == SenderId));
+                var data2 = Builders<User>.Update.Push(x => x.Contacts, new Contact
+                {
+                    Created = DateTime.Now,
+                    UserId = model1.UserId,
+                    FirstName = model1.FirstName,
+                    UserName = model1.UserName,
+                    Photo = model1.Photo
+                });
+
+                var result = _context.UpdateOneAsync(filter1, data1, opts);
+                var result1 = _context.UpdateOneAsync(filter2, data2, opts);
+
+
+                //Create Room
+
+                var room = new ChatRoom() { ChatType = ConversationType.Private, Created = DateTime.Now };
+                room.Users = new List<int> { SenderId, RecieverId };
+
+                var filter = Builders<ChatRoom>.Filter;
+                var filterRoom = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private),
+                    filter.ElemMatch(z => z.Users, c => c == SenderId && c == RecieverId));
+
+                var update = Builders<ChatRoom>.Update;
+                var data = update.SetOnInsert(x => x.ChatType, ConversationType.Private)
+                    .SetOnInsert(x => x.Created, DateTime.Now)
+                    .PushEach(x => x.Users, room.Users);
+                var resultRoom = _chatContext.UpdateOneAsync(filterRoom, data, opts);
+                return Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
         }
 
         public Task<User> GetByUserId(int userName)
@@ -97,11 +152,20 @@ namespace StimikChatServer.Models
                         var mahasiswas = JsonConvert.DeserializeObject<List<Mahasiswa>>(resResult.data.ToString());
                         if (mahasiswas != null && mahasiswas.Count > 0)
                         {
+
                             var mahasiswa = mahasiswas.FirstOrDefault();
+                            var opts = new UpdateOptions()
+                            {
+                                IsUpsert = true
+                            };
                             var model = new User { FirstName = mahasiswa.Nmmhs, UserId = mahasiswa.IdUser, UserName = mahasiswa.Npm, Contacts=new List<Contact>() };
-                            model.Id = Guid.NewGuid().ToString();
-                            var op = new InsertOneOptions();
-                            await _context.InsertOneAsync(model);
+                            var filter1 = Builders<User>.Filter.And(Builders<User>.Filter.Eq(x => x.UserId, model.UserId),
+                                 Builders<User>.Filter.ElemMatch(x => x.Contacts, x => x.UserId == model.UserId));
+                            var data1 = Builders<User>.Update
+                                .Set(x =>x.FirstName,model.FirstName)
+                                .Set(x=>x.Photo,model.Photo)
+                                .Set(x=>x.UserName,model.UserName);
+                            var resultRoom = _context.UpdateOneAsync(filter1, data1, opts);
                             return model;
                         }
                         else
@@ -142,8 +206,7 @@ namespace StimikChatServer.Models
         Task<User> GetUserByUserId(int ownerId);
         Task<List<Contact>> GetContactsByOwnerId(int ownerId);
         Task<List<User>> Find(string data);
-
-        Task<User> AddToContact(int userOwner, int userId);
+        Task<bool> AddToContact(int userOwner, int userId);
         Task<User> GetByUserId(int userName);
         Task<User> CreateUser(string userToken);
         Task<User> RemoveFromContact(int userOwner, int userId);

@@ -23,11 +23,11 @@ namespace StimikChatServer
             userContext = _userContext;
         }
 
-        public async Task SendMessage(Conversation message)
+        public async Task SendMessage(ChatMessage message)
         {
             await Clients.All.SendAsync("ReceiveMessage", message);
         }
-        public async Task SendMessageTo(Conversation message)
+        public async Task SendMessageTo(ChatMessage message)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace StimikChatServer
                     await Clients.Client(connection.ConnectionID).SendAsync("ReceiveMessageFrom",  message);
                 else
                     this.SendByPushNotification(message.SenderId, message.Message);
-                await chatContext.AddMessageMyConversation(new Conversation 
+                await chatContext.AddMessageMyConversation(new ChatMessage 
                 { MessageId=message.MessageId, Created = DateTime.Now, Message = message.Message, Readed = false, SenderId = message.SenderId, RecieverId = message.RecieverId});
 
             }
@@ -47,7 +47,7 @@ namespace StimikChatServer
         }
 
 
-        public async Task ReadMessage(List<Conversation> messages)
+        public async Task ReadMessage(List<ChatMessage> messages)
         {
             try
             {
@@ -139,9 +139,18 @@ namespace StimikChatServer
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            Connection con = connectionContext.Remove(Context.ConnectionId).Result;
-            OnUserChangeOnlineStatus(con.UserId, false);
-            return base.OnDisconnectedAsync(exception);
+            try
+            {
+                Connection con = connectionContext.Remove(Context.ConnectionId).Result;
+                if (con != null)
+                    OnUserChangeOnlineStatus(con.UserId, false);
+                return base.OnDisconnectedAsync(exception);
+            }
+            catch (Exception ex)
+            {
+                SendError(Context.ConnectionId, ex.Message);
+                return base.OnDisconnectedAsync(exception);
+            }
         }
 
         #endregion
