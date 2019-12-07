@@ -80,7 +80,7 @@ namespace StimikChatServer
         public async Task CreateGroup(string groupName)
         {
             var userId = Convert.ToInt32(Context.GetHttpContext().Request.Query["userid"]);
-            IUser user = await userContext.GetByUserId(userId);
+            IUser user = await userContext.GetProfile(userId);
             if (user != null)
             {
                 //await hubContext.Groups.CreateGroup(user.UserId, groupName);
@@ -112,7 +112,7 @@ namespace StimikChatServer
                 var userId = Convert.ToInt32(Context.GetHttpContext().Request.Query["userid"]);
                 string token = Context.GetHttpContext().Request.Query["token"];
 
-                var user = userContext.GetByUserId(userId).Result;
+                var user = userContext.GetProfile(userId).Result;
                 if (user == null)
                 {
                     user = userContext.CreateUser(token).Result;

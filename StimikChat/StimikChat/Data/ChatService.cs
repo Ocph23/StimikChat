@@ -33,7 +33,7 @@ namespace StimikChat.Data
         {
             MyAccount = account;
             Connection = new HubConnectionBuilder()
-                .WithUrl($"https://localhost:44360/chatHub?userid={MyAccount.IdUser}&&token={MyAccount.Token}")
+                .WithUrl($"http://localhost:54340/chatHub?userid={MyAccount.IdUser}&&token={MyAccount.Token}")
                 .Build();
 
             Connection.On<ChatMessage>("ReceiveMessageFrom", OnRecieveMessageFrom);
@@ -42,7 +42,7 @@ namespace StimikChat.Data
 
             Connection.Closed += Connection_Closed;
             await Connection.StartAsync();
-            GetContacts();
+            GetProfile();
             Connected = true;
         }
 
@@ -96,13 +96,13 @@ namespace StimikChat.Data
 
         #endregion
 
-        private async void GetContacts()
+        private async void GetProfile()
         {
             var   contactService = new ContactService();
-            var result = await contactService.GetContacts(MyAccount.IdUser);
-            if (result != null)
+            var result = await contactService.GetProfile(MyAccount.IdUser);
+            if (result != null && result.Contacts!=null)
             {
-                foreach (var item in result)
+                foreach (var item in result.Contacts)
                 {
                     var room = new ConversationRoom(ConversationType.Private, MyAccount, item);
                     room.OnSendMessage += Room_OnSendMessage;
@@ -189,6 +189,20 @@ namespace StimikChat.Data
             }
 
             CurrentRoom = room;
+
+            if(CurrentRoom!=null && CurrentRoom.Conversations!=null && CurrentRoom.Conversations.Count<=0 )
+            {
+                var conversationService = new ConversationService();
+                var chatRoom = await conversationService.GetConversations(MyAccount.IdUser, contactId);
+                if(chatRoom!=null)
+                foreach (var item in chatRoom.Messages)
+                {
+                    CurrentRoom.Conversations.Add(item);
+                } 
+            }
+
+          
+
             if(CurrentRoom!=null && CurrentRoom.Conversations != null)
             {
                 var unReaded = CurrentRoom.Conversations.Where(x =>x.SenderId==CurrentRoom.UserId && x.Readed==false).ToList();
@@ -203,6 +217,8 @@ namespace StimikChat.Data
                
 
             }
+
+              this.Refresh();
 
         }
     }

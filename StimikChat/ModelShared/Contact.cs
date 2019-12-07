@@ -10,8 +10,7 @@ namespace ModelShared
 {
     public class Contact : IContact
     {
-        [JsonIgnore]
-        public string Id { get; set; }
+
         public int UserId { get; set; }
 
         public string UserName { get; set; }
@@ -25,10 +24,6 @@ namespace ModelShared
         [BsonIgnore]
         public List<ChatMessage> Conversations { get; set; } = new List<ChatMessage>();
 
-        public object Clone()
-        {
-           return this.MemberwiseClone();
-        }
     }
 }
 

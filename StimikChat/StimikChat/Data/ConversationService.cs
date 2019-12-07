@@ -10,21 +10,21 @@ namespace StimikChat.Data
 {
     public class ConversationService
     {
-        public async Task<List<ChatMessage>> GetConversations(int id)
+        public async Task<ChatRoom> GetConversations(int id,int contactId)
         {
             try
             {
-                using (var service = new RestService("https://localhost:44360"))
+                using (var service = new RestService("http://localhost:54340"))
                 {
-                    var resonse = await service.GetAsync($"api/conversation/{id}");
+                    var resonse = await service.GetAsync($"api/conversation/{id}/{contactId}");
                     if (resonse.IsSuccessStatusCode)
                     {
                         var stringResult = await resonse.Content.ReadAsStringAsync();
-                        var datas = JsonConvert.DeserializeObject<List<ChatMessage>>(stringResult);
+                        var datas = JsonConvert.DeserializeObject<ChatRoom>(stringResult);
                         return datas;
                     }
 
-                    return default(List<ChatMessage>);
+                    return default(ChatRoom);
                 }
             }
             catch (Exception ex)

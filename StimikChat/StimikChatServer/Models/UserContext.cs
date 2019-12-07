@@ -62,7 +62,7 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<bool> AddToContact(int SenderId, int RecieverId)
+        public Task<bool> AddToContact(int Sender,int Reciever)
         {
             try
             {
@@ -71,52 +71,33 @@ namespace StimikChatServer.Models
                     IsUpsert = true
                 };
 
-                //add recieve to sender
-                var model1 = _context.Find(x => x.UserId == SenderId).FirstOrDefault();
-                var model2 = _context.Find(x => x.UserId == RecieverId).FirstOrDefault();
+                var user1 = _context.Find(x=>x.UserId==Sender).FirstOrDefault();
+                var user2 = _context.Find(x=>x.UserId==Reciever).FirstOrDefault();
+                Contact contact1=GenerateContact(user1);
+                  Contact contact2=GenerateContact(user2);
 
+                  
 
-                var filter1 = Builders<User>.Filter.And(Builders<User>.Filter.Eq(x => x.UserId, SenderId),
-                    Builders<User>.Filter.ElemMatch(x => x.Contacts, x => x.UserId == RecieverId));
-                var data1 = Builders<User>.Update.Push(x => x.Contacts, new Contact
-                {
-                    Created = DateTime.Now,
-                    UserId = model2.UserId,
-                    FirstName = model2.FirstName,
-                    UserName = model2.UserName,
-                    Photo = model2.Photo
-                });
+                var data1 = Builders<User>.Update.AddToSet(x => x.Contacts,contact2);
+                _context.UpdateOne(x=>x.Id==user1.Id,data1);
 
-                //add sender to sender
-                var filter2 = Builders <User> .Filter.And(Builders<User>.Filter.Eq(x => x.UserId, RecieverId),
-                    Builders<User>.Filter.ElemMatch(x => x.Contacts, x => x.UserId == SenderId));
-                var data2 = Builders<User>.Update.Push(x => x.Contacts, new Contact
-                {
-                    Created = DateTime.Now,
-                    UserId = model1.UserId,
-                    FirstName = model1.FirstName,
-                    UserName = model1.UserName,
-                    Photo = model1.Photo
-                });
-
-                var result = _context.UpdateOneAsync(filter1, data1, opts);
-                var result1 = _context.UpdateOneAsync(filter2, data2, opts);
-
+                  var data2 = Builders<User>.Update.AddToSet(x => x.Contacts,contact1);
+                _context.UpdateOne(x=>x.Id==user2.Id,data2);
 
                 //Create Room
 
-                var room = new ChatRoom() { ChatType = ConversationType.Private, Created = DateTime.Now };
-                room.Users = new List<int> { SenderId, RecieverId };
+                var room = new ChatRoom() { ChatType = ConversationType.Private};
+                room.Users = new List<Contact> { contact1,contact2};
 
                 var filter = Builders<ChatRoom>.Filter;
                 var filterRoom = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private),
-                    filter.ElemMatch(z => z.Users, c => c == SenderId && c == RecieverId));
+                    filter.ElemMatch(x=>x.Users,c=>c.UserId==Sender),filter.ElemMatch(x=>x.Users,c=>c.UserId==Reciever));
 
                 var update = Builders<ChatRoom>.Update;
-                var data = update.SetOnInsert(x => x.ChatType, ConversationType.Private)
-                    .SetOnInsert(x => x.Created, DateTime.Now)
-                    .PushEach(x => x.Users, room.Users);
-                var resultRoom = _chatContext.UpdateOneAsync(filterRoom, data, opts);
+                var data = update.SetOnInsert(x => x.ChatType, room.ChatType)
+                .SetOnInsert(x=>x.Messages,new List<ChatMessage>())
+                .SetOnInsert(x=>x.Users,new List<Contact>{contact1,contact2});
+                var resultRoom = _chatContext.UpdateOne(filterRoom, data, opts);
                 return Task.FromResult(true);
             }
             catch (Exception ex)
@@ -125,11 +106,16 @@ namespace StimikChatServer.Models
             }
         }
 
-        public Task<User> GetByUserId(int userName)
+        private Contact GenerateContact(User user)
+        {
+            return new Contact{UserId=user.UserId, FirstName=user.FirstName,UserName=user.UserName,Photo=user.Photo };
+        }
+
+        public Task<User> GetProfile(int id)
         {
             try
             {
-                return _context.Find(x => x.UserId == userName).FirstOrDefaultAsync();
+                return _context.Find(x => x.UserId == id).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -164,7 +150,8 @@ namespace StimikChatServer.Models
                             var data1 = Builders<User>.Update
                                 .Set(x =>x.FirstName,model.FirstName)
                                 .Set(x=>x.Photo,model.Photo)
-                                .Set(x=>x.UserName,model.UserName);
+                                .Set(x=>x.UserName,model.UserName)
+                                .Set(x=>x.Contacts, new List<Contact>());
                             var resultRoom = _context.UpdateOneAsync(filter1, data1, opts);
                             return model;
                         }
@@ -198,7 +185,7 @@ namespace StimikChatServer.Models
             }
         }
 
-
+      
     }
 
     public interface IUserContext
@@ -206,10 +193,10 @@ namespace StimikChatServer.Models
         Task<User> GetUserByUserId(int ownerId);
         Task<List<Contact>> GetContactsByOwnerId(int ownerId);
         Task<List<User>> Find(string data);
-        Task<bool> AddToContact(int userOwner, int userId);
-        Task<User> GetByUserId(int userName);
+        Task<bool> AddToContact(int userOwner,int userId);
         Task<User> CreateUser(string userToken);
         Task<User> RemoveFromContact(int userOwner, int userId);
+        Task<User> GetProfile(int id);
     }
 
 

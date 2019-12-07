@@ -26,7 +26,9 @@ namespace StimikChatServer.Models
             {
 
                 var filter = Builders<ChatRoom>.Filter;
-                var filter1 = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private), filter.ElemMatch(z => z.Users, c => c == sender && c == reciever));
+                var filter1 = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private), 
+                filter.ElemMatch(z => z.Users, c => c.UserId == sender),
+                filter.ElemMatch(z => z.Users, c => c.UserId == reciever));
                 return _context.Find<ChatRoom>(filter1, new FindOptions()).FirstOrDefaultAsync();
             }
             catch (Exception ex)
@@ -39,16 +41,13 @@ namespace StimikChatServer.Models
         {
             try
             {
-
-                var room = new ChatRoom() { ChatType= ConversationType.Private, Created=DateTime.Now };
-                room.Users = new List<int> { message.SenderId, message.RecieverId };
-
                 var opts = new UpdateOptions()
                 {
                     IsUpsert = true
                 };
                 var filter = Builders<ChatRoom>.Filter;
-                var filter1 = filter.And(filter.Eq(x=>x.ChatType,ConversationType.Private), filter.ElemMatch(z => z.Users, c => c== message.SenderId && c==message.RecieverId));
+                var filter1 = filter.And(filter.Eq(x=>x.ChatType,ConversationType.Private), filter.ElemMatch(z => z.Users, c => c.UserId== message.SenderId),
+                filter.ElemMatch(z => z.Users, c => c.UserId== message.RecieverId));
 
                 var update = Builders<ChatRoom>.Update;
                 var data = update.Push(x=>x.Messages, message);
@@ -70,11 +69,14 @@ namespace StimikChatServer.Models
             {
                 var model = messages.FirstOrDefault();
                 var filter = Builders<ChatRoom>.Filter;
-                var filter1 = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private), filter.ElemMatch(z => z.Users, 
-                    c => c == model.SenderId && c == model.RecieverId));
+                var filter1 = filter.And(filter.Eq(x => x.ChatType, ConversationType.Private),
+                 filter.Where(z => z.Users.Any(c => c.UserId == model.SenderId)),
+                 filter.Where(z => z.Users.Any(c => c.UserId == model.RecieverId))
+                 );
+
                 var update = Builders<ChatRoom>.Update;
-                var data = update.Set("Messages.$.Readed", messages);
-                _context.UpdateManyAsync(filter1,data);
+                var data = update.Set(x=>x.Messages[-1].Readed, true);
+                var result= _context.UpdateMany(filter1,data, null);
 
                 return Task.CompletedTask;
             }

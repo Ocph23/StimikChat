@@ -8,14 +8,13 @@ namespace ModelShared.Interfaces
     public interface IChatRoom
     {
 
-        ObjectId Id { get; set; }
+        string Id { get; set; }
 
-        DateTime Created { get; set; }
 
         int OwnerId { get; set; }
 
         string RoomName { get; set; }
-        List<int> Users { get; set; }
+        List<Contact> Users { get; set; }
 
         ConversationType ChatType { get; set; }
 

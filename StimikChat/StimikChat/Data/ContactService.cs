@@ -11,7 +11,7 @@ namespace StimikChat.Data
 {
     public class ContactService
     {
-        private string chatServerUrl = "https://localhost:44360";
+        private string chatServerUrl = "http://localhost:54340/";
         public async Task<IEnumerable<Contact>> GetContacts(int id)
         {
             try
@@ -34,6 +34,31 @@ namespace StimikChat.Data
                 throw new SystemException(ex.Message);
             }
         }
+
+
+         public async Task<User> GetProfile(int id)
+        {
+            try
+            {
+                using (var service = new RestService(chatServerUrl))
+                {
+                   var resonse= await service.GetAsync($"api/contact/Getprofile/{id}");
+                    if(resonse.IsSuccessStatusCode)
+                    {
+                        var stringResult = await resonse.Content.ReadAsStringAsync();
+                        var datas = JsonConvert.DeserializeObject<User>(stringResult);
+                        return datas;
+                    }
+
+                    return default(User);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SystemException(ex.Message);
+            }
+        }
+
 
         public async Task<List<Contact>> Find(string data)
         {

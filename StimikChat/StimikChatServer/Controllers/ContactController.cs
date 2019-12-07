@@ -31,6 +31,13 @@ namespace StimikChatServer.Controllers
         }
 
 
+          [HttpGet("{action}/{id}",Name ="GetContacts")]
+        public async Task<User> GetProfile(int id)
+        {
+            return await context.GetProfile(id);
+        }
+
+
 
         [HttpGet("{action}/{name}", Name = "Find")]
         public async Task<IEnumerable<User>> Find(string name)
@@ -41,9 +48,9 @@ namespace StimikChatServer.Controllers
 
 
         [HttpGet("{action}/{ownerId}/{userId}", Name = "AddToContact")]
-        public async Task<bool> AddToContact(int ownerId,int userid)
+        public async Task<bool> AddToContact(int ownerId, int userId )
         {
-            return await context.AddToContact(ownerId,userid);
+            return await context.AddToContact(ownerId,userId);
         }
 
         // PUT: api/Contact/5

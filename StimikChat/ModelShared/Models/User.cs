@@ -9,7 +9,6 @@ namespace ModelShared.Models
 {
     public class User : IUser
     {
-        [JsonIgnore]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }

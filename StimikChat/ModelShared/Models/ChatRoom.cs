@@ -8,14 +8,18 @@ namespace ModelShared.Models
 {
     public class ChatRoom : IChatRoom
     {
-        [BsonId]
-        public ObjectId Id { get; set; }
+         [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public string RoomName { get; set; }
-        public DateTime Created { get; set; }
         public int OwnerId { get; set; }
-        public List<int> Users { get; set; } = new List<int>();
+        public List<Contact> Users { get; set; } = new List<Contact>();
         public ConversationType ChatType { get; set; }
         public List<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+
+
+        
+
     }
 }
 

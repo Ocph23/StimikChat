@@ -21,7 +21,7 @@ namespace StimikChatServer.Controllers
             chatContext = context;
         }
         // GET: api/Conversation/5
-        [HttpGet("{senderId}/recieverId", Name = "Get")]
+        [HttpGet("{senderId}/{recieverId}", Name = "Get")]
         public async Task<ChatRoom> Get(int senderId, int recieverId)
         {
             return await chatContext.GetConversation(senderId, senderId);

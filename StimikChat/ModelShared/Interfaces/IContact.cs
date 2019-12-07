@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace ModelShared.Interfaces
 {
-    public interface IContact:ICloneable
+    public interface IContact
     {
         public int UserId { get; set; }
 

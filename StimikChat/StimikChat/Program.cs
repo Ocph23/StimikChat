@@ -24,7 +24,7 @@ namespace StimikChat
                 {
                     var port = Environment.GetEnvironmentVariable("PORT");
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://*:" + port);
+                    //webBuilder.UseUrls("http//localhost:" + 5008);
                 });
     }
 }
