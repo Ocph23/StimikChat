@@ -14,7 +14,7 @@ namespace StimikChat.Data
         {
             try
             {
-                using (var service = new RestService("http://localhost:54340"))
+                using (var service = new RestService("https://stimikchatapi.herokuapp.com"))
                 {
                     var resonse = await service.GetAsync($"api/conversation/{id}/{contactId}");
                     if (resonse.IsSuccessStatusCode)

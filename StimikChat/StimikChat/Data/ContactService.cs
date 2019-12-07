@@ -11,7 +11,7 @@ namespace StimikChat.Data
 {
     public class ContactService
     {
-        private string chatServerUrl = "http://localhost:54340/";
+        private string chatServerUrl = "https://stimikchatapi.herokuapp.com/";
         public async Task<IEnumerable<Contact>> GetContacts(int id)
         {
             try

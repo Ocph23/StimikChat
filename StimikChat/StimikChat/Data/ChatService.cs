@@ -33,7 +33,7 @@ namespace StimikChat.Data
         {
             MyAccount = account;
             Connection = new HubConnectionBuilder()
-                .WithUrl($"http://localhost:54340/chatHub?userid={MyAccount.IdUser}&&token={MyAccount.Token}")
+                .WithUrl($"https://stimikchatapi.herokuapp.com/chatHub?userid={MyAccount.IdUser}&&token={MyAccount.Token}")
                 .Build();
 
             Connection.On<ChatMessage>("ReceiveMessageFrom", OnRecieveMessageFrom);
