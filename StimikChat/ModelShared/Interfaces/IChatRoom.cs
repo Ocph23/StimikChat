@@ -7,6 +7,7 @@ namespace ModelShared.Interfaces
 {
     public interface IChatRoom
     {
+
         ObjectId Id { get; set; }
 
         DateTime Created { get; set; }
